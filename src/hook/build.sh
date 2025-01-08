@@ -14,3 +14,9 @@ docker buildx build \
     --file ../"${DOCKERFILE}" \
     --tag "${IMAGE_LATEST}" \
     ../.
+
+# Let everyone know we are finished!
+for i in {1..10}; do
+    echo -e "\a"
+    sleep 0.5   
+done
