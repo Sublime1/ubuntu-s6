@@ -42,19 +42,20 @@ ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLA
 # * Run
 # hadolint ignore=DL3008,DL3003
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata xz-utils --no-install-recommends && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    cd /tmp && \
-    tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
-    tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz && \
-    tar -C / -Jxpf /tmp/s6-overlay-symlinks-noarch.tar.xz && \
-    tar -C / -Jxpf /tmp/s6-overlay-symlinks-arch.tar.xz && \
-    rm /tmp/s6-overlay-noarch.tar.xz && \
-    rm /tmp/s6-overlay-x86_64.tar.xz && \
-    rm /tmp/s6-overlay-symlinks-noarch.tar.xz && \
-    rm /tmp/s6-overlay-symlinks-arch.tar.xz
-
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        tzdata \   
+        xz-utils \
+    # Now we use the build-time dependency (xz-utils)
+    && tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz \
+    && tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz \
+    && tar -C / -Jxpf /tmp/s6-overlay-symlinks-noarch.tar.xz \
+    && tar -C / -Jxpf /tmp/s6-overlay-symlinks-arch.tar.xz \
+    # Now that we're done with it, purge the build-time dependency
+    && apt-get purge -y --auto-remove xz-utils \
+    # And finish with standard cleanup
+    && rm -rf /tmp/*.tar.xz \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # * Entrypoint
 ENTRYPOINT ["/init"]
