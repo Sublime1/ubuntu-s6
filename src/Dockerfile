@@ -1,12 +1,15 @@
 # syntax=docker/dockerfile:1.4
 
 # * Base image
-ARG UBUNTU_VERSION="${UBUNTU_VERSION}"
-FROM ubuntu:${UBUNTU_VERSION}
+ARG BASE_IMAGE_NAME="${BASE_IMAGE_NAME}"
+ARG BASE_IMAGE_TAG="${BASE_IMAGE_TAG}"
+FROM ${BASE_IMAGE_NAME}:${BASE_IMAGE_TAG}
 
 # * Arguments
 ARG S6_OVERLAY_VERSION="${S6_OVERLAY_VERSION}" \
     BUILD_DATE="${BUILD_DATE}" \
+    BASE_IMAGE_NAME="${BASE_IMAGE_NAME}" \
+    BASE_IMAGE_TAG="${BASE_IMAGE_TAG}" \
     UBUNTU_VERSION="${UBUNTU_VERSION}"
 
 # * Labels
@@ -22,9 +25,9 @@ LABEL \
     org.opencontainers.image.vendor="" \
     org.opencontainers.image.licenses="" \
     org.opencontainers.image.ref.name="" \
-    org.opencontainers.image.title="Ubuntu image with s6 init system" \
-    org.opencontainers.image.description="Ubuntu base docker image using s6-overlay" \
-    org.opencontainers.ubuntu.version="${UBUNTU_VERSION}" \
+    org.opencontainers.image.title="Base image with s6 init system" \
+    org.opencontainers.image.description="Debian/Ubuntu base docker image using s6-overlay" \
+    org.opencontainers.image.base.name="${BASE_IMAGE_NAME}:${BASE_IMAGE_TAG}" \
     org.opencontainers.s6overlay.version="${S6_OVERLAY_VERSION}"
 
 # * Environment
@@ -41,9 +44,11 @@ ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLA
 
 # * Run
 # hadolint ignore=DL3008,DL3003
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        tzdata \   
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
+    apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install -y --no-install-recommends \
+        tzdata \
         xz-utils \
     # Now we use the build-time dependency (xz-utils)
     && tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz \
@@ -54,8 +59,7 @@ RUN apt-get update && \
     && apt-get purge -y --auto-remove xz-utils \
     # And finish with standard cleanup
     && rm -rf /tmp/*.tar.xz \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean
 
 # * Entrypoint
 ENTRYPOINT ["/init"]
