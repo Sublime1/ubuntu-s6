@@ -59,7 +59,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     && apt-get purge -y --auto-remove xz-utils \
     # And finish with standard cleanup
     && rm -rf /tmp/*.tar.xz \
-    && apt-get clean
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # * Entrypoint
 ENTRYPOINT ["/init"]

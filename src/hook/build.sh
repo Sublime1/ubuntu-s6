@@ -23,6 +23,7 @@ else
 fi
 
 BUILD_ARGS=(
+    --load
     "${CACHE_ARGS[@]}"
     --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
     --build-arg S6_OVERLAY_VERSION="${S6_OVERLAY_VERSION}"
