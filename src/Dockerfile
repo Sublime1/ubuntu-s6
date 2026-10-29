@@ -49,6 +49,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 update && \
     DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install -y --no-install-recommends \
         tzdata \
+        procps \
         xz-utils \
     # Now we use the build-time dependency (xz-utils)
     && tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz \
