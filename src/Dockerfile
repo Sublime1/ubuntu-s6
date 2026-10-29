@@ -42,7 +42,7 @@ ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLA
 ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-symlinks-arch.tar.xz /tmp
 
 
-# * Run
+# * Run procps is needed to provide uptime
 # hadolint ignore=DL3008,DL3003
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
