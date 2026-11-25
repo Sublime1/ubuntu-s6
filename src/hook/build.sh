@@ -8,6 +8,7 @@ DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 BUILDKIT_CACHE_DIR="${BUILDKIT_CACHE_DIR:-../.buildx-cache}"
 BUILDKIT_CACHE_MODE="${BUILDKIT_CACHE_MODE:-max}"
 USE_LOCAL_CACHE="${USE_LOCAL_CACHE:-auto}"
+PULL_BASE_IMAGE="${PULL_BASE_IMAGE:-1}"
 
 BUILDX_DRIVER="$(docker buildx inspect --bootstrap 2>/dev/null | awk '/^Driver:/ { print $2; exit }')"
 
@@ -35,6 +36,10 @@ BUILD_ARGS=(
     --tag "${IMAGE_LATEST}"
     ../.
 )
+
+if [ "${PULL_BASE_IMAGE}" = "1" ]; then
+    BUILD_ARGS=(--pull "${BUILD_ARGS[@]}")
+fi
 
 if [ "${NO_CACHE:-0}" = "1" ]; then
     BUILD_ARGS=(--no-cache "${BUILD_ARGS[@]}")
